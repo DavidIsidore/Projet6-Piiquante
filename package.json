@@ -1,0 +1,19 @@
+{
+  "name": "p6-piiquante",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DavidIsidore/Projet6-Piiquante.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DavidIsidore/Projet6-Piiquante/issues"
+  },
+  "homepage": "https://github.com/DavidIsidore/Projet6-Piiquante#readme"
+}
