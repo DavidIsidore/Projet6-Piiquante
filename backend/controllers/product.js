@@ -90,8 +90,7 @@ exports.findAllSauces = (req, res, next) => {
 
    //export de la fonction gérant les likes
    exports.likeSauce = (req,res,next) => { //on récupère la sauce
-    const sauceObject = JSON.parse(req.body.sauce);
-    alert('Je suis dans la gestion des likes');
+    //const sauceObject = JSON.parse(req.body.sauce);
     Sauce.findOne({_id:req.params.id})
     .then(sauce =>{ // on vérifie qu'il s'agit d'un utilisateur différent
         if(sauce.userId = req.body.userId) { //s'il s'agit du créateur de la sauce
