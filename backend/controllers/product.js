@@ -93,7 +93,7 @@ exports.findAllSauces = (req, res, next) => {
     //const sauceObject = JSON.parse(req.body.sauce);
     Sauce.findOne({_id:req.params.id})
     .then(sauce =>{ // on vérifie qu'il s'agit d'un utilisateur différent
-        if(sauce.userId = req.body.userId) { //s'il s'agit du créateur de la sauce
+        if(sauce.userId = req.auth.userId) { //s'il s'agit du créateur de la sauce
             res.status(400).json({message : "Vous n'êtes pas autorisé à liker votre propre sauce"}) // on lui dit qu'il ne peut liker sa propre sauce
         }else{
             // on vérifie que l'utilisateur n'a pas déjà voté pour cette sauce
@@ -105,7 +105,7 @@ exports.findAllSauces = (req, res, next) => {
                 sauce.usersLiked.push(userId); 
                 //on met la sauce à jour avec les nouveaux paramètres
                 Sauce.updateOne({_id: req.params.id},{...sauceObject,_id:req.params.id, likes:req.body.like,usersLiked:req.body.usersLiked})
-                .then(() => res.status(200).json({message: 'Merci d\'avoir apprécié'}))
+                .then(() => res.status(20).json({message: 'Merci d\'avoir apprécié'}))
                 .catch(error => res.status(401).json({error}));
                 
 
