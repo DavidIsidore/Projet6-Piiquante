@@ -8,7 +8,7 @@ const fs = require('fs');
 //export de la fonction de création d'une nouvelle sauce
 exports.createSauce = (req, res, next) => {
     
-    //on parse l'objet
+    //on parse l'objet pour pouvoir exploiter les données
     const sauceObject = JSON.parse(req.body.sauce);
     // à voir s'il faut enlever les 2 lignes suivantes
     //delete sauceObject._id;
@@ -90,7 +90,7 @@ exports.findAllSauces = (req, res, next) => {
 
    //export de la fonction gérant les likes
    exports.likeSauce = (req,res,next) => { //on récupère la sauce
-    //const sauceObject = JSON.parse(req.body.sauce);
+    const sauceObject = JSON.parse(req.body.sauce); //on parse l'objet pour pouvoir exploiter les données
     Sauce.findOne({_id:req.params.id})
     .then(sauce =>{ // on vérifie qu'il s'agit d'un utilisateur différent
         if(sauce.userId = req.auth.userId) { //s'il s'agit du créateur de la sauce
