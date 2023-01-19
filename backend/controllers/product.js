@@ -3,6 +3,7 @@ const Sauce = require('../models/Sauce');
 
 //import de fs pour gérer la modification des fichiers
 const fs = require('fs');
+const { pluralize } = require('mongoose');
 
 
 //export de la fonction de création d'une nouvelle sauce
@@ -88,29 +89,49 @@ exports.findAllSauces = (req, res, next) => {
     .catch(error => res.status(400).json({error}));
    };
 
-   //export de la fonction gérant les likes
-   exports.likeSauce = (req,res,next) => { //on récupère la sauce
-    const sauceObject = JSON.parse(req.body.sauce); //on parse l'objet pour pouvoir exploiter les données
+      exports.likeSauce = (req,res,next) => {
+    //pour cette sauce
     Sauce.findOne({_id:req.params.id})
-    .then(sauce =>{ // on vérifie qu'il s'agit d'un utilisateur différent
-        if(sauce.userId = req.auth.userId) { //s'il s'agit du créateur de la sauce
-            res.status(400).json({message : "Vous n'êtes pas autorisé à liker votre propre sauce"}) // on lui dit qu'il ne peut liker sa propre sauce
-        }else{
-            // on vérifie que l'utilisateur n'a pas déjà voté pour cette sauce
-            if(sauce.usersLiked.includes(req.body.userId)){ //si l'utilisateur a déjà liké
-                res.status(400).json({message: "Vous ne pouvez pas liker plusieurs fois la même sauce (même si elle vous plaît beaucoup)"})
-            } else { //si l'utilisateur n'a pas encore liké
-                alert('Vous n\'avez pas encore liké cette sauce');
-                //on ajoute l'utilisateur au tableau
-                sauce.usersLiked.push(userId); 
-                //on met la sauce à jour avec les nouveaux paramètres
-                Sauce.updateOne({_id: req.params.id},{...sauceObject,_id:req.params.id, likes:req.body.like,usersLiked:req.body.usersLiked})
-                .then(() => res.status(20).json({message: 'Merci d\'avoir apprécié'}))
-                .catch(error => res.status(401).json({error}));
-                
+    .then((sauce)=> {
+        //Si l'utilisateur n'a pas encore voté pour cette sauce et qu'il apprécie la recette
+        if(!sauce.usersLiked.includes(req.body.userId) && req.body.like ===1) {
+            //on ajoute l'utilisateur au tableau de ceux qui ont aimé
+            sauce.usersLiked.push(req.body.userId);
+            //on met la sauce à jour avec les nouveaux paramètres
+            Sauce.updateOne({_id:req.params.id}, { likes:1, usersLiked:req.body.usersLiked})
+            .then(() => res.status(201).json({message: 'Merci pour votre like'}))
+            .catch((error) => res.status(400).json({error}));
+        }
 
-            }
+        //si l'utilisateur a déjà voté pour cette sauce et enlève son like
+        if(sauce.usersLiked.includes(req.body.userId) && req.body.like === 0) {
+            //on enlève l'utilisateur du tableau de ceux qui ont aimé
+            sauce.usersLiked.pull(req.body.userId);
+            //on met la sauce à jour avec les nouveaux paramètres         
+            Sauce.updateOne({_id:req.params.userId}, {likes: -1, usersLiked:req.body.usersLiked})
+            .then(() => res.status(201).json({message: 'Vous n\'aimez plus cette sauce, on dirait'}))
+            .catch((error) => res.status(400).json({error}));
+        }
+
+        //si l'utilisateur n'a pas encore voté et qu'il n'aime pas cette sauce
+        if(!sauce.usersLiked.includes(req.body.userId) && req.body.like === -1) {
+            //on ajoute l'utilisateur au tableau de ceuxqui n'ont pas aimé
+            sauce.usersDisliked.push(req.body.userId);
+            //on met la sauce à jour avec les nouveaux paramètres
+            Sauce.updateOne({_id: req.params.userId}, {dislikes :1, usersDisliked:req.body.usersDisliked})
+            .then(() => res.status(201).json({message: 'Vous n\'avez pas aimé cette sauce'}))
+            .catch((error) => res.status(400).json({error}));
+        }
+
+        //si l'utilisateur a dit qu'il n'aimait pas et enlève son dislike
+        if(sauce.usersDisliked.includes(req.body.userId) && req.body.like === 0) {
+            //on enlève l'utilisateur du tableau de ceux qui n'ont pas aimé
+            sauce.usersDisliked.pull(req.body.userId);
+            //on met la sauce à jour avec les nouveaux paramètres
+            Sauce.updateOne({_id:req.params.userId}, {dislikes: -1, usersDisliked:req.body.usersDisliked    })
+            .then(() => res.status(201).json({message : 'user dislike 0'}))
+            .catch((error => res.status(400).json({error})));
         }
     })
-    .catch(error => res.status(400).json({error}));
-   };
+    .catch((error)=> res.status(400).json({error}));
+   }

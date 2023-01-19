@@ -33,10 +33,10 @@ router.get('/:id', auth, productCtrl.findOneSauce);
 
 
 // Récupération du tableau des sauces
-router.use('/', auth, productCtrl.findAllSauces);
+router.get('/', auth, productCtrl.findAllSauces);
 
 //gestion des likes
-router.post('/:id/likes',auth , productCtrl.likeSauce);
+router.post('/:id/like',auth , productCtrl.likeSauce);
 
 /*----------------FIN DES ROUTES-----------------*/
 
