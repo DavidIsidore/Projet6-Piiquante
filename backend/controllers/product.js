@@ -130,7 +130,7 @@ exports.findAllSauces = (req, res, next) => {
         
         //on met la sauce à jour avec les nouveaux paramètres
         Sauce.updateOne({_id:req.params.userId}, {$inc:{dislikes: -1},$pull:{usersDisliked:req.body.userId}})
-        .then(() => res.status(201).json({message : 'user dislike 0'}))
+        .then(() => res.status(201).json({message : 'Vous avez regoûté et vous appréciez !'}))
         .catch((error => res.status(400).json({message:'Erreur 4'})));
     }
 
