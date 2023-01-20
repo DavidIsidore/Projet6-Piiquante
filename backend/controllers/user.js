@@ -24,7 +24,7 @@ exports.signup = (req,res,next) => {
     .catch();
 };
 
-//on exporte la fonction de conncetion
+//on exporte la fonction de connection
 exports.login = (req,res,next) => {
     User.findOne({email: req.body.email})
     .then(user => {

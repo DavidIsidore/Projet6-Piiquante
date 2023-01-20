@@ -90,48 +90,68 @@ exports.findAllSauces = (req, res, next) => {
    };
 
       exports.likeSauce = (req,res,next) => {
+       //const sauceObject = JSON.parse(...req.body.sauce);
+        
     //pour cette sauce
     Sauce.findOne({_id:req.params.id})
     .then((sauce)=> {
-        //Si l'utilisateur n'a pas encore voté pour cette sauce et qu'il apprécie la recette
-        if(!sauce.usersLiked.includes(req.body.userId) && req.body.like ===1) {
-            //on ajoute l'utilisateur au tableau de ceux qui ont aimé
-            sauce.usersLiked.push(req.body.userId);
-            //on met la sauce à jour avec les nouveaux paramètres
-            Sauce.updateOne({_id:req.params.id}, { likes:1, usersLiked:req.body.usersLiked})
-            .then(() => res.status(201).json({message: 'Merci pour votre like'}))
-            .catch((error) => res.status(400).json({error}));
-        }
+        console.log(sauce);
+        console.log(req.body);
+        console.log(req.params);
+    //Si l'utilisateur n'a pas encore voté pour cette sauce et qu'il apprécie la recette
+    if(!sauce.usersLiked.includes(req.body.userId) && req.body.like ===1) {
+        //on ajoute l'utilisateur au tableau de ceux qui ont aimé
+        sauce.usersLiked.push(req.body.userId);
+        //on incrémente la valeur de likes de la sauce
+        //let like = req.body.like + 1;
+        //on met la sauce à jour avec les nouveaux paramètres
+        Sauce.updateOne({_id:req.params.id}, { $inc:{likes:1},$push:{usersLiked:req.body.userId}})
+        .then(() => res.status(201).json({message: 'Merci pour votre like'}))
+        .catch((error) => res.status(400).json({message: 'Erreur 1'}));
+    }
 
-        //si l'utilisateur a déjà voté pour cette sauce et enlève son like
-        if(sauce.usersLiked.includes(req.body.userId) && req.body.like === 0) {
-            //on enlève l'utilisateur du tableau de ceux qui ont aimé
-            sauce.usersLiked.pull(req.body.userId);
-            //on met la sauce à jour avec les nouveaux paramètres         
-            Sauce.updateOne({_id:req.params.userId}, {likes: -1, usersLiked:req.body.usersLiked})
-            .then(() => res.status(201).json({message: 'Vous n\'aimez plus cette sauce, on dirait'}))
-            .catch((error) => res.status(400).json({error}));
-        }
+    //si l'utilisateur n'a pas encore voté et qu'il n'aime pas cette sauce
+    if(!sauce.usersLiked.includes(req.body.userId) && req.body.like === -1) {
+        //on ajoute l'utilisateur au tableau de ceuxqui n'ont pas aimé
+        sauce.usersDisliked.push(req.body.userId);
+        //on incrémente la valeur de dislikes de la sauce
+        l//et dis = req.body.dislike + 1;
+        //on met la sauce à jour avec les nouveaux paramètres
+        Sauce.updateOne({_id: req.params.userId}, {$inc:{dislikes:1},$push:{usersDisliked:req.body.userId}})
+        .then(() => res.status(201).json({message: 'Vous n\'avez pas aimé cette sauce'}))
+        .catch((error) => res.status(400).json({message:'Erreur 2'}));
+    }
 
-        //si l'utilisateur n'a pas encore voté et qu'il n'aime pas cette sauce
-        if(!sauce.usersLiked.includes(req.body.userId) && req.body.like === -1) {
-            //on ajoute l'utilisateur au tableau de ceuxqui n'ont pas aimé
-            sauce.usersDisliked.push(req.body.userId);
-            //on met la sauce à jour avec les nouveaux paramètres
-            Sauce.updateOne({_id: req.params.userId}, {dislikes :1, usersDisliked:req.body.usersDisliked})
-            .then(() => res.status(201).json({message: 'Vous n\'avez pas aimé cette sauce'}))
-            .catch((error) => res.status(400).json({error}));
-        }
+    //si l'utilisateur a déjà voté pour cette sauce et enlève son like
+    if(sauce.usersLiked.includes(req.body.userId) && req.body.like === 0) {
+        //on enlève l'utilisateur du tableau de ceux qui ont aimé
+        //sauce.usersLiked.pull(req.body.userId);
+        //on décrémente la valeur de likes de la sauce
+        //let like = req.body.like - 1;
+        //on met la sauce à jour avec les nouveaux paramètres         
+        Sauce.updateOne({_id:req.params.userId}, {$inc:{likes: -1},$pull:{usersLiked:res.body.userId}})
+        .then(() => res.status(201).json({message: 'Vous n\'aimez plus cette sauce, on dirait'}))
+        .catch((error) => res.status(400).json({message:'Erreur 3'}));
+    }
 
-        //si l'utilisateur a dit qu'il n'aimait pas et enlève son dislike
-        if(sauce.usersDisliked.includes(req.body.userId) && req.body.like === 0) {
-            //on enlève l'utilisateur du tableau de ceux qui n'ont pas aimé
-            sauce.usersDisliked.pull(req.body.userId);
-            //on met la sauce à jour avec les nouveaux paramètres
-            Sauce.updateOne({_id:req.params.userId}, {dislikes: -1, usersDisliked:req.body.usersDisliked    })
-            .then(() => res.status(201).json({message : 'user dislike 0'}))
-            .catch((error => res.status(400).json({error})));
-        }
+    //si l'utilisateur a dit qu'il n'aimait pas et enlève son dislike
+    if(sauce.usersDisliked.includes(req.body.userId) && req.body.like === 0) {
+        //on enlève l'utilisateur du tableau de ceux qui n'ont pas aimé
+        sauce.usersDisliked.pull(req.body.userId);
+        //on décrémente la valeur de dislikes de la sauce
+        //let dislike = req.body.like - 1;
+        //on met la sauce à jour avec les nouveaux paramètres
+        Sauce.updateOne({_id:req.params.userId}, {$inc:{dislikes: -1},$pull:{usersDisliked:req.body.userId}})
+        .then(() => res.status(201).json({message : 'user dislike 0'}))
+        .catch((error => res.status(400).json({message:'Erreur 4'})));
+    }
+
+    //si l'utilisateur a déjà liké/dislké une sauce et qu'il veut liker/disliker à nouveau
+    if(sauce.userId.includes(req.body.usersLiked && req.body.like === 1) || (sauce.userId.includes(req.body.usersDisliked) && req.body.like === -1)){
+        res.status(400).json({message: 'Vous ne pouvez liker/disliker plusieurs fois la même sauce'});
+    }
     })
-    .catch((error)=> res.status(400).json({error}));
+    .catch((error)=> res.status(400).json({message:'Vous ne pouvez liker/disliker plusieurs fois la même sauce'}));
    }
+
+ 
