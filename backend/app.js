@@ -1,6 +1,9 @@
 // import de Express
 const express = require('express');
 
+//import de helmet (sécurité)
+const helmet = require('helmet');
+
 //import de mongoose
 const mongoose = require('mongoose');
 
@@ -10,9 +13,12 @@ const path = require('path');
 //import de body-parser pour avoir une réponse au bon format
 const bodyparser = require('body-parser');
 
+//imoort de dotenv
+require('dotenv').config();
 
 //création de l'application
 const app = express();
+app.use(helmet.crossOriginResourcePolicy({policy: 'cross-origin'}));
 
 //on importe le routeur des produits
 const productRoutes = require('./routes/product');
@@ -21,7 +27,7 @@ const productRoutes = require('./routes/product');
 const userRoutes = require('./routes/user');
 
 //Connection à la base de données
-mongoose.connect('mongodb+srv://serialcoder:aBQjHHvMgRei93y@picante.kobnz2f.mongodb.net/?retryWrites=true&w=majority',
+mongoose.connect(`mongodb+srv://${process.env.dbuser}:${process.env.dbpasswd}@picante.kobnz2f.mongodb.net/?retryWrites=true&w=majority`,
   { useNewUrlParser: true,
     useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))
